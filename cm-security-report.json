@@ -1,0 +1,23 @@
+[
+  {
+    "FindingID": "df448bf2-7499-5d1a-a97c-6c43906f5836",
+    "SessionID": "ChBmMWU0YTAyZjc5YmRiOGI5EAgaATAqBG1haW4",
+    "Title": "Hard-coded Google Maps API Key",
+    "FilePath": "/home/runner/work/codemender-guardrails-lab/codemender-guardrails-lab/routes/guardrails-demo/demoOrder.ts",
+    "Severity": "HIGH",
+    "Confidence": 90,
+    "Analysis": "- Source: Static constant definition in source code (demoOrder.ts).\n- Sanitization/Validation: None; the API key is directly hardcoded into the source code rather than retrieved from secure environment variables or a secret manager.\n- Sink: The sensitive API key string \"AIzaSyD-mock-key-for-guardrails-demo-4402\" is stored directly in source code and partially exposed in the `processOrder` response.\n- Conceptual Exploit Payload:\n  An attacker inspecting the source repository or bundle can extract the key:\n  `GOOGLE_MAPS_API_KEY = \"AIzaSyD-mock-key-for-guardrails-demo-4402\"`\n  and make unauthorized API calls to Google Maps services at the expense and permissions of the application owner:\n  ```http\n  GET /maps/api/geocode/json?address=1600+Amphitheatre+Parkway\u0026key=AIzaSyD-mock-key-for-guardrails-demo-4402 HTTP/1.1\n  Host: maps.googleapis.com\n  ```",
+    "Snippet": "const GOOGLE_MAPS_API_KEY = \"AIzaSyD-mock-key-for-guardrails-demo-4402\"",
+    "VulnType": "CWE-798: Use of Hard-coded Credentials",
+    "VulnID": "CWE-798",
+    "Fingerprint": "",
+    "Status": "OPEN",
+    "SourceStage": "",
+    "FindingJSON": "",
+    "UpdatedAt": "",
+    "StartLine": 3,
+    "EndLine": 3,
+    "DismissReason": "",
+    "ConfidenceLevel": ""
+  }
+]
