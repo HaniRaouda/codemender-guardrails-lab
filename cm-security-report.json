@@ -1,0 +1,23 @@
+[
+  {
+    "FindingID": "df448bf2-7499-5d1a-a97c-6c43906f5836",
+    "SessionID": "ChBlNDRkMjU3NjA5YTI2Mzc3EAgaATAqBG1haW4",
+    "Title": "Hardcoded API Key (CWE-798)",
+    "FilePath": "/home/runner/work/codemender-guardrails-lab/codemender-guardrails-lab/routes/guardrails-demo/demoOrder.ts",
+    "Severity": "HIGH",
+    "Confidence": 90,
+    "Analysis": "The file `demoOrder.ts` contains a hardcoded API key (`GOOGLE_MAPS_API_KEY = \"AIzaSyD-mock-key-for-guardrails-demo-4402\"`). Embedding sensitive secrets or API tokens directly within source code exposes them to anyone with access to the codebase or version control history, leading to unauthorized use of the associated service or resource.\n\n**Source**: Hardcoded secret defined on line 3.\n**Sanitization/Validation**: No external secrets manager or environment variable lookup (e.g., `process.env.GOOGLE_MAPS_API_KEY`) is used.\n**Sink**: Static assignment in source code used by request handlers.\n\n**Conceptual Exploit Payload**:\nAn unauthorized party accessing the codebase or bundle extracts the credential:\n`GOOGLE_MAPS_API_KEY = \"AIzaSyD-mock-key-for-guardrails-demo-4402\"`\nand uses it to make authenticated requests directly to the service provider.",
+    "Snippet": "const GOOGLE_MAPS_API_KEY = \"AIzaSyD-mock-key-for-guardrails-demo-4402\"",
+    "VulnType": "CWE-798: Use of Hard-coded Credentials",
+    "VulnID": "CWE-798",
+    "Fingerprint": "",
+    "Status": "OPEN",
+    "SourceStage": "",
+    "FindingJSON": "",
+    "UpdatedAt": "",
+    "StartLine": 3,
+    "EndLine": 3,
+    "DismissReason": "",
+    "ConfidenceLevel": ""
+  }
+]
