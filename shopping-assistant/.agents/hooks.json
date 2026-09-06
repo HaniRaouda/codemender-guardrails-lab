@@ -1,0 +1,17 @@
+{
+  "hooks": [
+    {
+      "trigger": "before_tool_execution",
+      "tool": "run_command",
+      "action": "evaluate_safety",
+      "description": "Mid-trajectory safety hook preventing agent from running destructive bash commands or dropping database tables",
+      "blocked_patterns": [
+        "rm -rf /",
+        "mkfs",
+        "dd if=",
+        ":(){ :|:& };:",
+        "DROP TABLE"
+      ]
+    }
+  ]
+}
