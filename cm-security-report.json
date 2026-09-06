@@ -1,0 +1,23 @@
+[
+  {
+    "FindingID": "fece6252-fb94-59cb-8f97-3c214c8d2614",
+    "SessionID": "ChAzMWIyOTA5NmQwNjg5N2FjEAgaATAqBG1haW4",
+    "Title": "SQL Injection in demoOrder Handler via Unescaped orderId Parameter",
+    "FilePath": "/home/runner/work/codemender-guardrails-lab/codemender-guardrails-lab/routes/guardrails-demo/demoOrder.ts",
+    "Severity": "CRITICAL",
+    "Confidence": 100,
+    "Analysis": "### Vulnerability Analysis\n\n- **Source**: Untrusted user input is received via `req.body.orderId` in the Express request handler.\n- **Sanitization/Validation**: There is no input validation, type checking, or escaping applied to `orderId`. It is directly concatenated into the SQL statement via ES6 template literals.\n- **Sink**: The string is passed directly into `models.sequelize.query(...)`, which executes raw SQL against the database.\n- **Impact**: An attacker can execute arbitrary SQL queries, leading to unauthorized data retrieval, tampering, or database compromise.\n\n### Conceptual Exploit Payload\n\nSend an HTTP request with the following JSON body:\n```http\nPOST /demoOrder HTTP/1.1\nContent-Type: application/json\n\n{\n  \"orderId\": \"1' OR '1'='1' --\"\n}\n```\nOr for schema/data extraction via UNION injection:\n```json\n{\n  \"orderId\": \"1' UNION SELECT null, null, tbl_name, sql FROM sqlite_master --\"\n}\n```",
+    "Snippet": "    const orderId = req.body.orderId\n    models.sequelize.query(`SELECT * FROM Orders WHERE id = '${orderId}'`)",
+    "VulnType": "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')",
+    "VulnID": "CWE-89",
+    "Fingerprint": "",
+    "Status": "OPEN",
+    "SourceStage": "",
+    "FindingJSON": "",
+    "UpdatedAt": "",
+    "StartLine": 9,
+    "EndLine": 10,
+    "DismissReason": "",
+    "ConfidenceLevel": ""
+  }
+]
