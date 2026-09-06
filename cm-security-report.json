@@ -1,0 +1,23 @@
+[
+  {
+    "FindingID": "fece6252-fb94-59cb-8f97-3c214c8d2614",
+    "SessionID": "ChBmMGVjOGIwMmE3ZGQyM2ZkEAgaATAqBG1haW4",
+    "Title": "SQL Injection via Unsanitized orderId Parameter in demoOrder Route",
+    "FilePath": "/home/runner/work/codemender-guardrails-lab/codemender-guardrails-lab/routes/guardrails-demo/demoOrder.ts",
+    "Severity": "CRITICAL",
+    "Confidence": 100,
+    "Analysis": "The Express route handler extracts the `orderId` parameter directly from the untrusted HTTP request body `req.body.orderId` without any validation or sanitization, and interpolates it into a raw SQL query string passed to `models.sequelize.query()`. This allows an attacker to execute arbitrary SQL commands against the database.\n\n- **Source**: `req.body.orderId` on line 9\n- **Sanitization/Validation**: None; direct template string interpolation\n- **Sink**: `models.sequelize.query(...)` on line 10\n\n**Conceptual Exploit Payload**:\nSending an HTTP POST request with the following JSON body:\n```json\n{\n  \"orderId\": \"1' OR '1'='1\"\n}\n```\nThis payload breaks out of the single quotes in `WHERE id = '...'`, causing the SQL engine to execute `SELECT * FROM Orders WHERE id = '1' OR '1'='1'`, returning all records in the Orders table or enabling further UNION-based data extraction.",
+    "Snippet": "    const orderId = req.body.orderId\n    models.sequelize.query(`SELECT * FROM Orders WHERE id = '${orderId}'`)",
+    "VulnType": "SQL Injection",
+    "VulnID": "CWE-89",
+    "Fingerprint": "",
+    "Status": "OPEN",
+    "SourceStage": "",
+    "FindingJSON": "",
+    "UpdatedAt": "",
+    "StartLine": 9,
+    "EndLine": 10,
+    "DismissReason": "",
+    "ConfidenceLevel": ""
+  }
+]
