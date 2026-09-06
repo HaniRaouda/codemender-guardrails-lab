@@ -1,0 +1,113 @@
+name: CodeMender CI/CD Guardrail
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  codemender-guardrail:
+    name: CodeMender Security Guardrail
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud (WIF)
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/134686999095/locations/global/workloadIdentityPools/github-actions/providers/github-oidc
+          service_account: codemender-vm-sa@codemender-testing-503000.iam.gserviceaccount.com
+          audience: ${{ secrets.WIF_AUDIENCE }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install CodeMender CLI
+        run: |
+          gcloud artifacts generic download \
+            --project=cmoc-prod --location=us \
+            --repository=codemender-cli-production \
+            --package=cm --version=0.3.0 \
+            --name=cm-linux-amd64.zip --destination=./
+          unzip -o cm-linux-amd64.zip
+          chmod +x cm
+          sudo mv cm /usr/local/bin/cm
+          cm --version
+
+      - name: Initialize CodeMender Workspace
+        run: |
+          cm init
+          sed -i 's/confirm_commands: true/confirm_commands: false/' ~/.codemender/config.yaml || true
+          sed -i 's/confirm_writes: true/confirm_writes: false/' ~/.codemender/config.yaml || true
+
+      - name: Run CodeMender Scan (Scoped to guardrails demo)
+        run: |
+          echo "Scanning routes/guardrails-demo..."
+          cm find routes/guardrails-demo -y || true
+
+      - name: Generate Security Report
+        run: |
+          cm report -f json > cm-security-report.json || echo "[]" > cm-security-report.json
+          cat cm-security-report.json
+
+      - name: Upload Report Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codemender-report
+          path: cm-security-report.json
+
+      - name: Triage Findings
+        id: triage
+        run: |
+          python3 .github/scripts/cm_triage.py cm-security-report.json 3
+
+      - name: Apply Auto-Remediation Patches
+        if: steps.triage.outputs.target_ids != ''
+        run: |
+          for id in ${{ steps.triage.outputs.target_ids }}; do
+            echo "Applying patch for finding: $id"
+            cm fix "$id" --yes --bypass-warning || true
+          done
+
+      - name: Open Autonomous Remediation PR
+        if: steps.triage.outputs.target_ids != ''
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "fix(security): autonomous remediation by CodeMender"
+          title: "🤖 CodeMender: autonomous security remediation"
+          body: |
+            ## Automated Security Remediation
+            CodeMender detected High/Critical vulnerabilities in `routes/guardrails-demo/` and generated patches.
+            
+            - **Remediated Finding IDs**: `${{ steps.triage.outputs.target_ids }}`
+            - **Critical Count**: `${{ steps.triage.outputs.critical_count }}`
+            - **High Count**: `${{ steps.triage.outputs.high_count }}`
+            
+            Please review the diff and run tests before merging.
+          branch: codemender/auto-remediation
+          base: main
+          delete-branch: true
+
+      - name: Security Gate
+        run: |
+          if [ "${{ steps.triage.outputs.gate_status }}" = "FAILED" ]; then
+            echo "::error::Deployment blocked! Critical or High vulnerabilities detected in codebase."
+            exit 1
+          else
+            echo "Security Gate Passed. No blocking vulnerabilities detected."
+          fi

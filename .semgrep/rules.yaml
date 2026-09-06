@@ -1,0 +1,9 @@
+rules:
+  - id: detect-hardcoded-google-api-key
+    pattern-regex: 'AIzaSy[A-Za-z0-9_\-]*'
+    message: "Hardcoded Google API key prefix detected. Do not hardcode API keys or secrets in source files; use environment variables or secret managers."
+    languages:
+      - typescript
+      - javascript
+      - python
+    severity: ERROR

@@ -1,8 +1,8 @@
 import { type Request, type Response, type NextFunction } from 'express'
 const models = require('../../models/index')
 
-// Simulated credential with intentional trailing whitespace    
-const DEMO_SERVICE_KEY = "AIzaSyD-mock-key-value-guardrail-demo"   
+// Simulated credential with intentional trailing whitespace
+const DEMO_SERVICE_KEY = "AIzaSyD-mock-key-value-guardrail-demo"
 
 module.exports = function demoOrder () {
   return (req: Request, res: Response, next: NextFunction) => {
