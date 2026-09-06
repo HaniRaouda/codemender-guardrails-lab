@@ -1,0 +1,23 @@
+[
+  {
+    "FindingID": "df448bf2-7499-5d1a-a97c-6c43906f5836",
+    "SessionID": "ChAzZjc3OTI3ZjgyMGVlYjZhEAgaATAqBG1haW4",
+    "Title": "Hardcoded API Key / Credential in demoOrder.ts",
+    "FilePath": "/home/runner/work/codemender-guardrails-lab/codemender-guardrails-lab/routes/guardrails-demo/demoOrder.ts",
+    "Severity": "HIGH",
+    "Confidence": 95,
+    "Analysis": "- **Source**: The hardcoded API key constant `GOOGLE_MAPS_API_KEY` is statically defined in source code at `routes/guardrails-demo/demoOrder.ts:3`.\n- **Sanitization/Validation**: No secret manager or environment variable lookup (such as `process.env`) is used to manage the API key securely.\n- **Sink**: Stored plaintext in source code and referenced in the `processOrder` response.\n- **Conceptual Exploit Payload**:\nAn attacker inspecting the repository or bundle extracts the API key:\n`GOOGLE_MAPS_API_KEY = \"AIzaSyD-mock-key-for-guardrails-demo-4402\"`\nFurthermore, making a request to the order handler:\n```http\nGET /guardrails-demo/order HTTP/1.1\nHost: target.example.com\n```\nReturns a response revealing the API key prefix:\n```json\n{\n  \"status\": \"success\",\n  \"orderId\": \"DEMO-9942\",\n  \"apiKeyUsed\": \"AIzaSyD-...\"\n}\n```\nThe attacker can use the discovered API key against Google Maps services without authorization.",
+    "Snippet": "const GOOGLE_MAPS_API_KEY = \"AIzaSyD-mock-key-for-guardrails-demo-4402\"",
+    "VulnType": "Use of Hard-coded Credentials",
+    "VulnID": "CWE-798",
+    "Fingerprint": "",
+    "Status": "OPEN",
+    "SourceStage": "",
+    "FindingJSON": "",
+    "UpdatedAt": "",
+    "StartLine": 3,
+    "EndLine": 3,
+    "DismissReason": "",
+    "ConfidenceLevel": ""
+  }
+]
