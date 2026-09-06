@@ -1,0 +1,23 @@
+[
+  {
+    "FindingID": "df448bf2-7499-5d1a-a97c-6c43906f5836",
+    "SessionID": "ChA4MTkwZWI4ZjIwZTAxNjRiEAgaATAqBG1haW4",
+    "Title": "Use of Hard-coded Credentials (GOOGLE_MAPS_API_KEY)",
+    "FilePath": "/home/runner/work/codemender-guardrails-lab/codemender-guardrails-lab/routes/guardrails-demo/demoOrder.ts",
+    "Severity": "MEDIUM",
+    "Confidence": 95,
+    "Analysis": "Source: Hard-coded secret API key `GOOGLE_MAPS_API_KEY` defined in the source file.\nSanitization/Validation: None. While the API response truncates the key with `substring(0, 8)`, the full secret key is permanently committed and exposed within the codebase.\nSink: The hardcoded assignment `const GOOGLE_MAPS_API_KEY = \"AIzaSyD-mock-key-for-guardrails-demo-4402\"`.\n\nConceptual Exploit Payload:\nAn attacker reviewing the source code or client/server bundle extracts the hardcoded credential:\n`GOOGLE_MAPS_API_KEY = \"AIzaSyD-mock-key-for-guardrails-demo-4402\"`\nThe attacker can then misuse the credential against Google Maps APIs:\n`curl \"https://maps.googleapis.com/maps/api/geocode/json?address=1600+Amphitheatre+Parkway\u0026key=AIzaSyD-mock-key-for-guardrails-demo-4402\"`",
+    "Snippet": "const GOOGLE_MAPS_API_KEY = \"AIzaSyD-mock-key-for-guardrails-demo-4402\"",
+    "VulnType": "CWE-798: Use of Hard-coded Credentials",
+    "VulnID": "CWE-798",
+    "Fingerprint": "",
+    "Status": "OPEN",
+    "SourceStage": "",
+    "FindingJSON": "",
+    "UpdatedAt": "",
+    "StartLine": 3,
+    "EndLine": 3,
+    "DismissReason": "",
+    "ConfidenceLevel": ""
+  }
+]
