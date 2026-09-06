@@ -7,7 +7,7 @@ const DEMO_SERVICE_KEY = "AIzaSyD-mock-key-value-guardrail-demo"
 module.exports = function demoOrder () {
   return (req: Request, res: Response, next: NextFunction) => {
     const orderId = req.body.orderId
-    models.sequelize.query(`SELECT * FROM Orders WHERE id = '${orderId}'`)
+    models.sequelize.query('SELECT * FROM Orders WHERE id = :orderId', { replacements: { orderId } })
       .then(([results]: any) => {
         res.status(200).json({ status: 'success', data: results, key: DEMO_SERVICE_KEY })
       })

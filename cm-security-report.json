@@ -1,0 +1,23 @@
+[
+  {
+    "FindingID": "fece6252-fb94-59cb-8f97-3c214c8d2614",
+    "SessionID": "ChA4NmU5ZmY1MTcxNTIzZjk2EAgaATAqBG1haW4",
+    "Title": "SQL Injection in demoOrder handler via orderId parameter",
+    "FilePath": "/home/runner/work/codemender-guardrails-lab/codemender-guardrails-lab/routes/guardrails-demo/demoOrder.ts",
+    "Severity": "CRITICAL",
+    "Confidence": 100,
+    "Analysis": "The `demoOrder` route handler extracts `orderId` from the untrusted request body (`req.body.orderId`) and concatenates it directly into a raw SQL query string via template literal interpolation (`SELECT * FROM Orders WHERE id = '${orderId}'`) before executing it with `models.sequelize.query`. There is no input validation, sanitization, or parameterization.\n\n- **Source**: `req.body.orderId` in `demoOrder.ts`\n- **Sanitization/Validation**: None. The raw input string is interpolated directly into the SQL statement.\n- **Sink**: `models.sequelize.query(...)`\n\n### Conceptual Exploit Payload\nAn attacker can send an HTTP POST request with a JSON payload manipulating the SQL syntax to bypass authentication or extract arbitrary database contents:\n```http\nPOST /guardrails-demo/demoOrder HTTP/1.1\nHost: target.example.com\nContent-Type: application/json\n\n{\n  \"orderId\": \"1' OR '1'='1' UNION SELECT id, email, password, null, null, null, null, null, null FROM Users--\"\n}\n```",
+    "Snippet": "    const orderId = req.body.orderId\n    models.sequelize.query(`SELECT * FROM Orders WHERE id = '${orderId}'`)",
+    "VulnType": "SQL Injection",
+    "VulnID": "CWE-89",
+    "Fingerprint": "",
+    "Status": "OPEN",
+    "SourceStage": "",
+    "FindingJSON": "",
+    "UpdatedAt": "",
+    "StartLine": 9,
+    "EndLine": 10,
+    "DismissReason": "",
+    "ConfidenceLevel": ""
+  }
+]
