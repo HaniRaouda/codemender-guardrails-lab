@@ -1,0 +1,23 @@
+[
+  {
+    "FindingID": "ae543fe6-2898-58a2-9807-de9c3231b69f",
+    "SessionID": "ChA1ZmE2YjFiYmNhYTI3ZTA0EAgaATAqBG1haW4",
+    "Title": "SQL Injection via Unsanitized orderId Parameter",
+    "FilePath": "/home/runner/work/codemender-guardrails-lab/codemender-guardrails-lab/routes/guardrails-demo/demoOrder.ts",
+    "Severity": "CRITICAL",
+    "Confidence": 100,
+    "Analysis": "### Trace of Data Flow\n- **Source**: `req.body.orderId` enters via the HTTP request body in the Express handler at line 9.\n- **Sanitization/Validation**: None. The `orderId` value is directly interpolated into the raw SQL query string via template literal `${orderId}` without parameterized queries, escaping, or type validation.\n- **Sink**: `models.sequelize.query(...)` executes the raw SQL query against the database at line 10.\n\n### Conceptual Exploit Payload\nSend an HTTP request with JSON payload:\n```json\n{\n  \"orderId\": \"1' OR '1'='1\"\n}\n```\nOr for data exfiltration across tables:\n```json\n{\n  \"orderId\": \"' UNION SELECT * FROM Users -- \"\n}\n```\nThis payload breaks out of the string literal in `SELECT * FROM Orders WHERE id = '${orderId}'` and executes arbitrary SQL commands.",
+    "Snippet": "    models.sequelize.query(`SELECT * FROM Orders WHERE id = '${orderId}'`)",
+    "VulnType": "SQL Injection",
+    "VulnID": "CWE-89",
+    "Fingerprint": "",
+    "Status": "OPEN",
+    "SourceStage": "",
+    "FindingJSON": "",
+    "UpdatedAt": "",
+    "StartLine": 10,
+    "EndLine": 10,
+    "DismissReason": "",
+    "ConfidenceLevel": ""
+  }
+]
