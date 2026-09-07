@@ -1,0 +1,23 @@
+[
+  {
+    "FindingID": "fece6252-fb94-59cb-8f97-3c214c8d2614",
+    "SessionID": "ChAzZjA2OTA3ZTM5YjM4OWUwEAgaATAqBG1haW4",
+    "Title": "SQL Injection in demoOrder via unparameterized Sequelize raw query",
+    "FilePath": "/home/runner/work/codemender-guardrails-lab/codemender-guardrails-lab/routes/guardrails-demo/demoOrder.ts",
+    "Severity": "CRITICAL",
+    "Confidence": 100,
+    "Analysis": "The endpoint handler extracts `orderId` directly from untrusted user input `req.body.orderId` and string-interpolates it into a raw SQL query string passed to `models.sequelize.query()`. Because there is no input validation, sanitization, or parameterization, an attacker can manipulate the query structure.\n\nData path:\n- Source: `req.body.orderId` at line 9.\n- Sanitization/Validation: None.\n- Sink: `models.sequelize.query(\\`SELECT * FROM Orders WHERE id = '${orderId}'\\`)` at line 10.\n\nConceptual Exploit Payload:\nA POST request with JSON payload:\n```json\n{\n  \"orderId\": \"1' UNION SELECT null, username, password, null FROM Users --\"\n}\n```\nThis payload terminates the original string literal in the SQL query and executes a UNION SELECT query to extract sensitive data from the database.",
+    "Snippet": "    const orderId = req.body.orderId\n    models.sequelize.query(`SELECT * FROM Orders WHERE id = '${orderId}'`)",
+    "VulnType": "SQL Injection",
+    "VulnID": "CWE-89",
+    "Fingerprint": "",
+    "Status": "OPEN",
+    "SourceStage": "",
+    "FindingJSON": "",
+    "UpdatedAt": "",
+    "StartLine": 9,
+    "EndLine": 10,
+    "DismissReason": "",
+    "ConfidenceLevel": ""
+  }
+]
